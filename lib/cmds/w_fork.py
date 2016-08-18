@@ -146,6 +146,3 @@ for row in state_map:
                                   new_istate_id=long(row['new_istate_id'])))
     
     
-
-Contact GitHub API Training Shop Blog About
-© 2016 GitHub, Inc. Terms Privacy Security Status Help
