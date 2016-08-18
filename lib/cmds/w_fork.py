@@ -1,3 +1,19 @@
+Skip to content
+This repository
+Search
+Pull requests
+Issues
+Gist
+ @nrego
+ Unwatch 1
+  Star 0
+  Fork 0 nrego/westpa_old
+ Code  Issues 0  Pull requests 0  Wiki  Pulse  Graphs  Settings
+Branch: master Find file Copy pathwestpa_old/lib/cmds/w_fork.py
+cdb89b7  5 days ago
+ Nicholas Rego initial commit
+0 contributors
+RawBlameHistory    150 lines (126 sloc)  6.1 KB
 # Copyright (C) 2013 Matthew C. Zwier and Lillian T. Chong
 #
 # This file is part of WESTPA.
@@ -105,13 +121,16 @@ for (iseg, (index_row, pcoord)) in enumerate(izip(old_index, old_final_pcoords))
     istate = istates[iseg]
     istate.iter_created = 0
     istate.iter_used = 1
-    istate.istate_type = InitialState.ISTATE_TYPE_RESTART
+    #istate.istate_type = InitialState.ISTATE_TYPE_RESTART
+    istate.istate_type = InitialState.ISTATE_TYPE_BASIS
     istate.istate_status = InitialState.ISTATE_STATUS_PREPARED
     istate.pcoord = pcoord
     
     segment = Segment(n_iter=1, seg_id=iseg, weight=index_row['weight'],
-                      parent_id =-(istate.state_id+1),
-                      wtg_parent_ids = [-(istate.state_id+1)], 
+                      #parent_id =-(istate.state_id+1),
+                      parent_id = (istate.state_id),
+                      #wtg_parent_ids = [-(istate.state_id+1)], 
+                      wtg_parent_ids = [(istate.state_id)],
                       status=Segment.SEG_STATUS_PREPARED)
     segment.pcoord = numpy.zeros((pcoord_len, pcoord_ndim), dtype=pcoord.dtype)
     segment.pcoord[0] = pcoord
@@ -144,3 +163,5 @@ for row in state_map:
     
     
 
+Contact GitHub API Training Shop Blog About
+© 2016 GitHub, Inc. Terms Privacy Security Status Help
