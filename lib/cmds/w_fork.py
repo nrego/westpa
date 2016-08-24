@@ -105,13 +105,16 @@ for (iseg, (index_row, pcoord)) in enumerate(izip(old_index, old_final_pcoords))
     istate = istates[iseg]
     istate.iter_created = 0
     istate.iter_used = 1
-    istate.istate_type = InitialState.ISTATE_TYPE_RESTART
+    #istate.istate_type = InitialState.ISTATE_TYPE_RESTART
+    istate.istate_type = InitialState.ISTATE_TYPE_BASIS
     istate.istate_status = InitialState.ISTATE_STATUS_PREPARED
     istate.pcoord = pcoord
     
     segment = Segment(n_iter=1, seg_id=iseg, weight=index_row['weight'],
-                      parent_id =-(istate.state_id+1),
-                      wtg_parent_ids = [-(istate.state_id+1)], 
+                      #parent_id =-(istate.state_id+1),
+                      parent_id = (istate.state_id),
+                      #wtg_parent_ids = [-(istate.state_id+1)], 
+                      wtg_parent_ids = [(istate.state_id)],
                       status=Segment.SEG_STATUS_PREPARED)
     segment.pcoord = numpy.zeros((pcoord_len, pcoord_ndim), dtype=pcoord.dtype)
     segment.pcoord[0] = pcoord
@@ -143,4 +146,3 @@ for row in state_map:
                                   new_istate_id=long(row['new_istate_id'])))
     
     
-
