@@ -66,8 +66,8 @@ class StringDriver(object):
         try:
             sm_params = self.system.sm_params
         except AttributeError as e:
-            log.error('String Driver Error: system does not define sm_params. \
-                        This is required and should be added to the system definition; {}'.format(e))
+            log.error('String Driver Error: system does not define sm_params.' \
+                        'This is required and should be added to the system definition; {}'.format(e))
             raise
 
         # Initialize the string
@@ -241,6 +241,7 @@ class StringDriver(object):
             sm_global_group = self.data_manager.we_h5file.require_group('stringmethod')
             last_update = long(sm_global_group.attrs.get('last_update', 0))
 
+        # Update metric tensor (if desired) everytime we update the string
         if n_iter - last_update < self.update_interval or n_iter < self.initial_update or not self.do_update:
             log.debug('Not updating string this iteration')
             return
