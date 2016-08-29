@@ -50,6 +50,17 @@ class StringDriver(object):
         self.do_update = check_bool(plugin_config.get('do_update', True))
         self.init_from_data = check_bool(plugin_config.get('init_from_data', True))
 
+        self.update_metric_tensor = check_bool(plugin_config.get('do_tensor_update', False))
+
+        # Try to load a supplied function to calculate metric tensor, if provided
+        #    Otherwise, set 'tensor_func' to None, and take care of it later
+        #    NOTE: if no tensor_func provided, will automatically set the metric tensor to None (eg. use default dfunc)
+        try:
+            methodname = plugin_config['tensor_method']
+            self.tensor_func = extloader.get_object(methodname)
+        except:
+            self.tensor_func = None
+
         self.dfunc = self.get_dfunc_method(plugin_config)
 
         # Load method to calculate average position in a bin
@@ -62,6 +73,9 @@ class StringDriver(object):
 
         # Get initial set of string centers
         centers = self.get_initial_centers()
+        ndim = centers.shape[1]
+        # Grab inverse metric tensor from h5 file or system, if provided - otherwise set to None
+        self.inv_tensor = self.get_initial_tensor()
 
         try:
             sm_params = self.system.sm_params
@@ -174,6 +188,36 @@ class StringDriver(object):
 
         return centers
 
+    def get_initial_tensor(self):
+        '''Get the initial (inverse) metric tensor, if provided; otherwise send back None'''
+        self.data_manager.open_backing()
+
+        with self.data_manager.lock:
+            n_iter = max(self.data_manager.current_iteration - 1, 1)
+            iter_group = self.data_manager.get_iter_group(n_iter)
+
+            # Try to get stored tensor, if present
+            inv_tensor = None
+            if self.init_from_data:
+                log.info('Attempting to initialize get metric tensor from data')
+
+                try:
+                    binhash = iter_group.attrs['binhash']
+                    bin_mapper = self.data_manager.get_bin_mapper(binhash)
+
+                    inv_tensor = bin_mapper.dfkwargs['inv_tensor']
+
+                except:
+                    log.warning('Initializing inverse tensor from data failed; Using definition in system instead.')
+                    inv_tensor = getattr(self.system.dfkwargs, 'inv_tensor', None)
+            else:
+                log.info('Initializing inverse tensor from system definition')
+                inv_tensor = getattr(self.system.dfkwargs, 'inv_tensor', None)
+
+        self.data_manager.close_backing()
+
+        return inv_tensor
+
     def update_bin_mapper(self):
         '''Update the bin_mapper using the current string'''
 
@@ -183,6 +227,8 @@ class StringDriver(object):
         try:
             dfargs = getattr(self.system, 'dfargs', None)
             dfkwargs = getattr(self.system, 'dfkwargs', None)
+            dfkwargs['inv_tensor'] = self.inv_tensor
+            
             self.system.bin_mapper = VoronoiBinMapper(self.dfunc, self.strings.centers, 
                                                       dfargs=dfargs, 
                                                       dfkwargs=dfkwargs)
@@ -225,6 +271,36 @@ class StringDriver(object):
         avg_pos[occ_ind] /= sum_bin_weight[occ_ind][:,np.newaxis]
 
         return avg_pos, sum_bin_weight
+
+    def avg_metric_tensor(self, n_iter):
+        '''Get average metric tensor up to iteration n_iter'''
+        nbins = self.system.bin_mapper.nbins
+        ndim = self.system.pcoord_ndim
+
+        start_iter = max(n_iter - min(self.windowsize, n_iter), 2)
+        stop_iter = n_iter + 1
+        iter_count = stop_iter - start_iter
+
+        # Keep a running total of metric tensor
+        metric_tensor = np.zeros((iter_count, ndim, ndim), dtype=self.system.pcoord_dtype)
+
+        for n in xrange(start_iter, stop_iter):
+            with self.data_manager.lock:
+                iter_group = self.data_manager.get_iter_group(n)
+                seg_index = iter_group['seg_index'][...]
+
+                pcoords = iter_group['pcoord'][:,-1,:]  # Only read final point
+    
+                weights = seg_index['weight']
+
+                pcoord_w = pcoords * weights[:,np.newaxis]
+
+                for n_seg in xrange(seg_index.size):
+                    curr_tensor = self.tensor_func(n_seg, iter_group)
+                    metric_tensor[n, ...] += curr_tensor * weights[n_seg]
+
+        # Some bins might have zero samples so exclude to avoid divide by zero
+        return numpy.sum(metric_tensor, axis=0) / iter_count
 
     def prepare_new_iteration(self):
 
