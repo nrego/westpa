@@ -56,7 +56,7 @@ class StringDriver(object):
         #    Otherwise, set 'tensor_func' to None, and take care of it later
         #    NOTE: if no tensor_func provided, will automatically set the metric tensor to None (eg. use default dfunc)
         try:
-            methodname = plugin_config['tensor_method']
+            methodname = plugin_config['tensor_function']
             self.tensor_func = extloader.get_object(methodname)
         except:
             self.tensor_func = None
@@ -209,10 +209,11 @@ class StringDriver(object):
 
                 except:
                     log.warning('Initializing inverse tensor from data failed; Using definition in system instead.')
-                    inv_tensor = getattr(self.system.dfkwargs, 'inv_tensor', None)
+                    inv_tensor = getattr(self.system, 'inv_tensor', None)
             else:
                 log.info('Initializing inverse tensor from system definition')
-                inv_tensor = getattr(self.system.dfkwargs, 'inv_tensor', None)
+
+                inv_tensor = getattr(self.system, 'inv_tensor', None)
 
         self.data_manager.close_backing()
 
@@ -228,6 +229,7 @@ class StringDriver(object):
             dfargs = getattr(self.system, 'dfargs', None)
             dfkwargs = getattr(self.system, 'dfkwargs', None)
             dfkwargs['inv_tensor'] = self.inv_tensor
+            log.debug('dfkwargs: {}'.format(dfkwargs))
             
             self.system.bin_mapper = VoronoiBinMapper(self.dfunc, self.strings.centers, 
                                                       dfargs=dfargs, 
@@ -297,10 +299,10 @@ class StringDriver(object):
 
                 for n_seg in xrange(seg_index.size):
                     curr_tensor = self.tensor_func(n_seg, iter_group)
-                    metric_tensor[n, ...] += curr_tensor * weights[n_seg]
+                    metric_tensor[n-start_iter, ...] += curr_tensor * weights[n_seg]
 
         # Some bins might have zero samples so exclude to avoid divide by zero
-        return numpy.sum(metric_tensor, axis=0) / iter_count
+        return np.sum(metric_tensor, axis=0) / iter_count
 
     def prepare_new_iteration(self):
 
@@ -325,6 +327,13 @@ class StringDriver(object):
             log.debug('Updating string - n_iter: {}'.format(n_iter))
 
         westpa.rc.pstatus('-westext.stringmethod -----------------\n')
+        if self.update_metric_tensor:
+            westpa.rc.pstatus('westext.stringmethod: Updating metric tensor\n')
+            westpa.rc.pflush()
+            new_tensor = self.avg_metric_tensor(n_iter)
+
+            self.inv_tensor = np.linalg.inv(new_tensor)
+
         westpa.rc.pstatus('westext.stringmethod: Calculating average position in string images\n')
         westpa.rc.pflush()
 
