@@ -292,6 +292,10 @@ class StringDriver(object):
                 seg_index = iter_group['seg_index'][...]
 
                 pcoords = iter_group['pcoord'][:,-1,:]  # Only read final point
+                try:
+                    coord = iter_group['auxdata/coord'][:,:]
+                except KeyError:
+                    continue
     
                 weights = seg_index['weight']
 
