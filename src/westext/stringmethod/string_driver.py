@@ -42,6 +42,7 @@ class StringDriver(object):
 
         # Parameters from config file
         self.windowsize = plugin_config.get('windowsize', 10)
+        self.tensor_windowsize = plugin_config.get('tensor_windowsize', self.windowsize)
         self.update_interval = plugin_config.get('update_interval', 10)
         self.initial_update = plugin_config.get('initial_update', 20)
         self.priority = plugin_config.get('priority', 0)
@@ -279,7 +280,7 @@ class StringDriver(object):
         nbins = self.system.bin_mapper.nbins
         ndim = self.system.pcoord_ndim
 
-        start_iter = max(n_iter - min(self.windowsize, n_iter), 2)
+        start_iter = max(n_iter - min(self.tensor_windowsize, n_iter), 2)
         stop_iter = n_iter + 1
         iter_count = stop_iter - start_iter
 
@@ -287,6 +288,7 @@ class StringDriver(object):
         metric_tensor = np.zeros((iter_count, ndim, ndim), dtype=self.system.pcoord_dtype)
 
         for n in xrange(start_iter, stop_iter):
+            log.info("for iter: {}".format(n))
             with self.data_manager.lock:
                 iter_group = self.data_manager.get_iter_group(n)
                 seg_index = iter_group['seg_index'][...]
