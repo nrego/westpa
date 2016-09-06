@@ -28,6 +28,8 @@ from westpa.yamlcfg import check_bool, ConfigItemMissing
 from westext.stringmethod import WESTStringMethod, DefaultStringMethod
 from westpa.binning import VoronoiBinMapper
 
+from pickle import PickleError
+
 
 class StringDriver(object):
     def __init__(self, sim_manager, plugin_config):
@@ -164,23 +166,35 @@ class StringDriver(object):
         self.data_manager.open_backing()
 
         with self.data_manager.lock:
-            n_iter = max(self.data_manager.current_iteration - 1, 1)
-            iter_group = self.data_manager.get_iter_group(n_iter)
+
 
             # First attempt to initialize string from data rather than system
             centers = None
             if self.init_from_data:
-                log.info('Attempting to initialize stringmethod from data')
+                log.info('Attempting to initialize stringmethod from data at iteration {}'.format(self.data_manager.current_iteration))
 
+                # First try to grab from current iteration
                 try:
+                    n_iter = self.data_manager.current_iteration
+                    iter_group = self.data_manager.get_iter_group(n_iter)
                     binhash = iter_group.attrs['binhash']
                     bin_mapper = self.data_manager.get_bin_mapper(binhash)
 
                     centers = bin_mapper.centers
 
                 except:
-                    log.warning('Initializing string centers from data failed; Using definition in system instead.')
-                    centers = self.system.bin_mapper.centers
+                    log.info('...Attempting to initialize stringmethod from data at iteration {}'.format(max(self.data_manager.current_iteration-1, 1)))
+
+                    try:
+                        n_iter = max(self.data_manager.current_iteration-1, 1)
+                        iter_group = self.data_manager.get_iter_group(n_iter)
+                        binhash = iter_group.attrs['binhash']
+                        bin_mapper = self.data_manager.get_bin_mapper(binhash)
+
+                        centers = bin_mapper.centers
+                    except:
+                        log.warning('Initializing string centers from data failed; Using definition in system instead.')
+                        centers = self.system.bin_mapper.centers
             else:
                 log.info('Initializing string centers from system definition')
                 centers = self.system.bin_mapper.centers
@@ -223,6 +237,9 @@ class StringDriver(object):
     def update_bin_mapper(self):
         '''Update the bin_mapper using the current string'''
 
+        # This does no harm if already open
+        self.data_manager.open_backing()
+
         westpa.rc.pstatus('westext.stringmethod: Updating bin mapper\n')
         westpa.rc.pflush()
 
@@ -237,6 +254,27 @@ class StringDriver(object):
                                                       dfkwargs=dfkwargs)
         except (ValueError, TypeError) as e:
             log.error('StringDriver Error: Failed updating the bin mapper: {}'.format(e))
+            raise
+
+        # Try to save the bin mapper immediately
+        try:
+            n_iter = self.data_manager.current_iteration
+            iter_group = self.data_manager.get_iter_group(n_iter)
+
+            try:
+                pickled, hashed = self.system.bin_mapper.pickle_and_hash()
+            except PickleError:
+                pickled = hashed = ''
+
+            if hashed and pickled:
+                # save_bin_mapper checks that mapper has not already been added to table
+                self.data_manager.save_bin_mapper(hashed, pickled)
+                iter_group.attrs['binhash'] = hashed
+            else:
+                iter_group.attrs['binhash'] = '' 
+
+        except:
+            log.error('String Driver Error: Failed storing the updated bin mapper')
             raise
 
     def avgpos_cartesian(self, n_iter):
