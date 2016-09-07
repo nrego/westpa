@@ -30,6 +30,32 @@ from westpa.binning import VoronoiBinMapper
 
 from pickle import PickleError
 
+tensor_dtype = np.float32
+
+
+# Get the average tensor for a single iteration, n_iter
+#   This calls the user-supplied tensor_func on each segment of iteration n_iter,
+#   sums them up (weighted by segment weight), and returns the total estimated avg
+#   tensor, along with the iter number for future processing
+#
+# n_iter - iter for which we will calculate avg tensor
+# pcoords - (n_seg, pcoord_ndim) Pcoords for each segment for a *single* time point during n_iter (usually the last)
+# coords - (n_seg, coord_ndim) coords for each segment for a *single* time point during n_iter
+# weights - (n_seg,) weights for each segment; sum to unity
+# tensor_func - function that returns metric tensor from a single segment's coords and pcoords
+#    called as:  tensor_func(n_seg, pcoord, coord)
+#
+def _avg_tensor_func(n_iter, pcoords, coords, weights, tensor_func):
+    ndim = pcoords.shape[1]
+    my_tensor = np.zeros((ndim, ndim), dtype=tensor_dtype)
+    for n_seg in xrange(pcoords.shape[0]):
+        pcoord = pcoords[n_seg]
+        coord = coords[n_seg]
+        curr_tensor = tensor_func(n_seg, pcoord, coord)
+        my_tensor += curr_tensor * weights[n_seg]
+
+    return my_tensor, n_iter
+
 
 class StringDriver(object):
     def __init__(self, sim_manager, plugin_config):
@@ -38,6 +64,7 @@ class StringDriver(object):
         if not sim_manager.work_manager.is_master:
                 return
 
+        self.work_manager = sim_manager.work_manager
         self.sim_manager = sim_manager
         self.data_manager = sim_manager.data_manager
         self.system = sim_manager.system
@@ -325,25 +352,36 @@ class StringDriver(object):
         # Keep a running total of metric tensor
         metric_tensor = np.zeros((iter_count, ndim, ndim), dtype=self.system.pcoord_dtype)
 
-        for n in xrange(start_iter, stop_iter):
-            log.info("for iter: {}".format(n))
-            with self.data_manager.lock:
-                iter_group = self.data_manager.get_iter_group(n)
-                seg_index = iter_group['seg_index'][...]
+        # These two functions are shannanagins necessary for interfacing with work manager...
 
-                pcoords = iter_group['pcoord'][:,-1,:]  # Only read final point
-                try:
-                    coord = iter_group['auxdata/coord'][:,:]
-                except KeyError:
-                    continue
-    
-                weights = seg_index['weight']
+        # Generator for work_manager
+        #  Go through each iteration, send out _avg_tensor_func (which calls user-supplied tensor func - yikes)
+        def task_gen():
+            for n in xrange(start_iter, stop_iter):
+                log.info("for iter: {}".format(n))
+                with self.data_manager.lock:
+                    iter_group = self.data_manager.get_iter_group(n)
+                    seg_index = iter_group['seg_index'][...]
 
-                pcoord_w = pcoords * weights[:,np.newaxis]
+                    pcoords = iter_group['pcoord'][:,-1,:]  # Only read final point
+                    weights = seg_index['weight']
+                    try:
+                        coords = iter_group['auxdata/coord'][...]
+                    except KeyError:
+                        continue
 
-                for n_seg in xrange(seg_index.size):
-                    curr_tensor = self.tensor_func(n_seg, iter_group)
-                    metric_tensor[n-start_iter, ...] += curr_tensor * weights[n_seg]
+                args = ()
+                kwargs = dict(n_iter=n, pcoords=pcoords, coords=coords, weights=weights,
+                              tensor_func=self.tensor_func)
+
+                yield (_avg_tensor_func, args, kwargs)
+
+        # Send out avg tensor calculation to each worker (one for each iteration)
+        #    Collect results - a tensor for iteration n_iter - and put it into proper spot in total array
+        for future in self.work_manager.submit_as_completed(task_gen()):
+            n_iter_tensor, n_iter = future.get_result(discard=True)
+            metric_tensor[n_iter-start_iter, ...] = n_iter_tensor
+
 
         # Some bins might have zero samples so exclude to avoid divide by zero
         return np.sum(metric_tensor, axis=0) / iter_count
