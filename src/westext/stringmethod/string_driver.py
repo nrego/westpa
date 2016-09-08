@@ -30,7 +30,7 @@ from westpa.binning import VoronoiBinMapper
 
 from pickle import PickleError
 
-tensor_dtype = np.float32
+tensor_dtype = np.float64
 
 
 # Get the average tensor for a single iteration, n_iter
@@ -350,7 +350,7 @@ class StringDriver(object):
         iter_count = stop_iter - start_iter
 
         # Keep a running total of metric tensor
-        metric_tensor = np.zeros((iter_count, ndim, ndim), dtype=self.system.pcoord_dtype)
+        metric_tensor = np.zeros((iter_count, ndim, ndim), dtype=tensor_dtype)
 
         # These two functions are shannanagins necessary for interfacing with work manager...
 
