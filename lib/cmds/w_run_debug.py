@@ -37,7 +37,7 @@ parser.add_argument('--oneseg', dest='only_one_segment', action='store_true',
 args = parser.parse_args()
 westpa.rc.process_args(args)
 # Force WM to use 'serial' work manager, regardless of environment or cmd line options
-setattr(args, 'work_manager', 'serial')
+#setattr(args, 'work_manager', 'serial')
 work_managers.environment.process_wm_args(args)
 work_manager = westpa.rc.work_manager = make_work_manager()
 

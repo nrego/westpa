@@ -45,7 +45,10 @@ tensor_dtype = np.float32
 # tensor_func - function that returns metric tensor from a single segment's coords and pcoords
 #    called as:  tensor_func(n_seg, pcoord, coord)
 #
-def _avg_tensor_func(n_iter, pcoords, coords, weights, tensor_func):
+def _avg_tensor_func(n_iter, iter_group, tensor_func):
+    pcoords = iter_group['pcoord'][:,-1,:]
+    coords = iter_group['auxdata/coord'][...]
+    weights = iter_group['seg_index']['weight']
     ndim = pcoords.shape[1]
     my_tensor = np.zeros((ndim, ndim), dtype=tensor_dtype)
     for n_seg in xrange(pcoords.shape[0]):
@@ -361,17 +364,17 @@ class StringDriver(object):
                 log.info("for iter: {}".format(n))
                 with self.data_manager.lock:
                     iter_group = self.data_manager.get_iter_group(n)
-                    seg_index = iter_group['seg_index'][...]
+                    #seg_index = iter_group['seg_index'][...]
 
-                    pcoords = iter_group['pcoord'][:,-1,:]  # Only read final point
-                    weights = seg_index['weight']
-                    try:
-                        coords = iter_group['auxdata/coord'][...]
-                    except KeyError:
-                        continue
+                    #pcoords = iter_group['pcoord'][:,-1,:]  # Only read final point
+                    #weights = seg_index['weight']
+                    #try:
+                    #    coords = iter_group['auxdata/coord'][...]
+                    #except KeyError:
+                    #    continue
 
                 args = ()
-                kwargs = dict(n_iter=n, pcoords=pcoords, coords=coords, weights=weights,
+                kwargs = dict(n_iter=n, iter_group=iter_group,
                               tensor_func=self.tensor_func)
 
                 yield (_avg_tensor_func, args, kwargs)
