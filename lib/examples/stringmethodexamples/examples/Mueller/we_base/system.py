@@ -40,37 +40,21 @@ class SimpleLangevinPropagator(WESTPropagator):
         self.nsubsteps = rc.get('steps_per_block')
         self.beta = rc.get('beta')
 
-        ff = ForceFields.Dickson2dRingForce()
+        ff = ForceFields.MuellerForce()
         MASS = 1.0
         XI = 1.5
         BETA = self.beta
         NDIMS = 2
         DT = 0.005
-        ISPERIODIC = np.array([0, 0], dtype=np.int)
+        ISPERIODIC = np.array([0], dtype=np.int)
         BOXSIZE = np.array([1.0E8, 1.0E8], dtype=pcoord_dtype)
 
         self.integrator = cIntegratorSimple.SimpleIntegrator(ff, MASS, XI, BETA, DT, NDIMS, ISPERIODIC, BOXSIZE, genrandint())
 
-    def get_label(self, x, last_state):
-        if (x[0] + 3.0)**2 + x[1]**2 < 1.0:
-            state = 0
-        elif (x[0] - 3.0)**2 + x[1]**2 < 1.0:
-            state = 1
-        else:
-            state = last_state
-
-        return state
-
     def get_pcoord(self, state):
         pcoord = None
         if state.label == 'initA':
-            pcoord = [-3.0, 0.0, 0]
-        elif state.label == 'initI1':
-            pcoord = [0.0, 3.0, 0]
-        elif state.label == 'initB':
-            pcoord = [3.0, 0.0, 1]
-        elif state.label == 'initI2':
-            pcoord = [0.0, -3.0, 1]
+            pcoord = [-0.5, 0.5]
 
         state.pcoord = pcoord
 
@@ -100,7 +84,7 @@ class System(WESTSystem):
 
         rc = self.rc.config['west', 'system']
 
-        self.pcoord_ndim = 3
+        self.pcoord_ndim = 2
         self.pcoord_len = 2
         self.pcoord_dtype = pcoord_dtype
         self.target_count = rc.get('target_count')

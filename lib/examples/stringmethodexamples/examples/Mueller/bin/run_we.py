@@ -2,13 +2,12 @@ import multiprocessing
 import os, sys
 import yaml
 import argparse
-import subprocess
 
-file_dir = os.path.dirname(os.path.abspath(__file__))
-basedir = os.path.split(file_dir)[0]
+basedir = os.getcwd()
 
 script_template = """
 #!/bin/bash
+
 cd {rundir}
 
 export WEST_SIM_ROOT={rundir}
@@ -19,14 +18,11 @@ echo west_pythonpath: $WEST_PYTHONPATH
 echo west_sim_root: $WEST_SIM_ROOT
 echo west_root: $WEST_ROOT
 
-BSTATE_ARGS_0="--bstate initA,1.0E12"
-BSTATE_ARGS_1="--bstate initI1,1"
-BSTATE_ARGS_2="--bstate initB,1"
-BSTATE_ARGS_3="--bstate initI2,1"
+BSTATE_ARGS="--bstate initA,1.0"
 
 if [ ! -f west.h5 ];
 then
-    $WEST_ROOT/bin/w_init -r we_{sim_name}.cfg $BSTATE_ARGS_0 $BSTATE_ARGS_1 $BSTATE_ARGS_2 $BSTATE_ARGS_3 > sim_{sim_name}_init.log &
+    $WEST_ROOT/bin/w_init -r we_{sim_name}.cfg $BSTATE_ARGS > sim_{sim_name}_init.log &
     wait
 fi
 
@@ -69,11 +65,11 @@ def run_job(kwargs):
 
     for p in protocols:
         # Setup external run script
-        env_file = os.path.join(rundir,'env.sh')
+        env_file = os.path.join(rundir, 'env.sh')
         with open(env_file, 'r') as f:
             ev = f.read()
 
-        sname = os.path.join(rundir,'run_{}_{}_{}.sh'.format(config_data['beta'],sim_id,p['name']))
+        sname = os.path.join(rundir,'run_{}_{}.sh'.format(sim_id,p['name']))
         script = script_template.format(rundir=rundir, sim_name=p['name'], env_variables=ev)
 
         with open(sname,'w') as f:
@@ -94,7 +90,7 @@ def run_job(kwargs):
         
         if not args.norun:
             print('Running {}'.format(sname))
-            subprocess.check_call('{}'.format(sname),shell=True,stderr=subprocess.STDOUT,)
+            os.system('{}'.format(sname))
 
 
 if __name__ == '__main__':
@@ -102,14 +98,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='WEST run script')
     parser.add_argument('-s', dest='nsims', type=int, default=10, help='number of simulations to run')
     parser.add_argument('-c', dest='config_file', required=True, nargs='+',help='yaml config file name')
-    parser.add_argument('-n', dest='name', nargs='*', help='simulation name to run; by default run all')
+    parser.add_argument('-n', dest='name', nargs='*', required=True,help='simulation name to run')
     parser.add_argument('-p', dest='protocols', nargs='*', help='protocols to run; by default run all')
     parser.add_argument('-w', dest='nworkers', type=int, default=multiprocessing.cpu_count(), 
-                                help='number of cores to use')
-    parser.add_argument('--start-sim', dest='start_sim', type=int, default=0, help='Starting sim number to run')
-    parser.add_argument('--no-run', dest='norun', default=False, action='store_true', 
-                                help='Only setup simulations but do not run them')
-
+                        help='number of cores to use')
+    parser.add_argument('--sid_offset', dest='sid_offset', type=int, default=0,
+                        help='offset for numbering simulations')
+    parser.add_argument('--no-run', dest='norun', default=False, action='store_true',
+                        help='Only setup simulations but do not run them')
+    
     args = parser.parse_args()
 
     # Setup worker pool
@@ -130,13 +127,13 @@ if __name__ == '__main__':
 
     if args.name is not None:
         config_data[:] = [grp for grp in config_data if grp['name'] in args.name]
-    
+
     if len(config_data) == 0:
         print('ERROR: No simulations to run')
         sys.exit(1)
 
     for grp in config_data:
-        for si in xrange(args.start_sim, args.start_sim + args.nsims):
+        for si in xrange(args.sid_offset, args.nsims + args.sid_offset):
             dict_in = {}
             dict_in['rundir'] = os.path.join(basedir,grp['name'],'{}'.format(si))
             dict_in['config_data'] = grp
@@ -148,5 +145,4 @@ if __name__ == '__main__':
         if not os.path.exists(os.path.join(basedir,grp['name'])):
             os.makedirs(os.path.join(basedir,grp['name']))
             os.makedirs(os.path.join(basedir,grp['name'],'analysis'))
-
     pool.map(run_job, inputs,chunksize=1)
