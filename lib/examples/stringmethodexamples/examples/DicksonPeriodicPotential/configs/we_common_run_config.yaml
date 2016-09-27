@@ -1,0 +1,15 @@
+---
+name: we_common
+alpha: 1.125
+nbins: 20
+target_count: 40
+tau: 10
+propagator_block_size: 800
+adjust_counts: True
+protocols:
+    - name: phase1
+      max_iterations: 1000
+      stringmethod: {do_update: True, windowsize: 100, update_interval: 25, initial_update: 10}
+    - name: phase2
+      max_iterations: 35000
+      stringmethod: {do_update: False, windowsize: 50, update_interval: 10, initial_update: 10}

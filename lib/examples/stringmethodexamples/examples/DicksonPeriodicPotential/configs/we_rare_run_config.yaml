@@ -1,0 +1,16 @@
+---
+name: we_rare
+alpha: 2.25
+nbins: 50
+target_count: 50
+tau: 10
+propagator_block_size: 2500
+adjust_counts: True
+protocols:
+    - name: phase1
+      max_iterations: 5000
+      stringmethod: {do_update: True, windowsize: 100, update_interval: 25, initial_update: 25}
+    - name: phase2
+      max_iterations: 35000
+      stringmethod: {do_update: False, windowsize: 100, update_interval: 25, initial_update: 25}
+

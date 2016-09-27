@@ -1,0 +1,33 @@
+syntax: glob
+.project
+.pydevproject
+*.pyc
+*.pyo
+*~
+*.swp
+*.swo
+.DS_Store
+
+*.so
+*.h5
+*.eps
+*.log
+*.sh
+*_bak
+*.bak
+*.npz
+*.npy
+
+syntax: regexp
+\.[0-9]+$
+
+build/
+analysis_old/
+we_[0-9]\.[0-9]/
+we_common/
+we_rare/
+bruteforce_common/
+bruteforce_rare/
+ElasticNetworkModel/data/
+we_freestr/
+we_freestr_prof/

@@ -1,0 +1,15 @@
+---
+name: bruteforce_common
+alpha: 1.125
+num_blocks: 2.0E8
+steps_per_block: 20
+blocks_per_dump: 10000
+
+---
+name: bruteforce_rare
+alpha: 2.25
+num_blocks: 1.0E9
+steps_per_block: 20
+blocks_per_dump: 50000
+
+

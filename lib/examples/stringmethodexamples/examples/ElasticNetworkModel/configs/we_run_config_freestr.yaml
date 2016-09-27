@@ -1,0 +1,22 @@
+---
+name: we_freestr
+nbins: 40
+target_count: 40
+tau: 400
+init_pos: coordsA
+adjust_counts: True
+propagator_block_size: 100
+protocols:
+    - name: phase1
+      max_iterations: 1000
+      weed: {do_reweighting: True, window_size: 0.5, reweight_period: 10, max_window_size: 500, rate_calc_queue_size: 10, rate_calc_n_blocks: 25}
+      stringmethod: {do_update: True, windowsize: 50, update_interval: 10, initial_update: 10, fixed_ends: False, init_string_ends: None}
+    - name: phase2
+      max_iterations: 1500
+      weed: {do_reweighting: True, window_size: 0.5, reweight_period: 25, max_window_size: 500, rate_calc_queue_size: 10, rate_calc_n_blocks: 25}
+      stringmethod: {do_update: False, windowsize: 50, update_interval: 10, initial_update: 10, fixed_ends: False, init_string_ends: None}
+    - name: phase3
+      max_iterations: 4500
+      weed: {do_reweighting: False, window_size: 0.5, reweight_period: 25, max_window_size: 500, rate_calc_queue_size: 10, rate_calc_n_blocks: 25}
+      stringmethod: {do_update: False, windowsize: 50, update_interval: 10, initial_update: 10, fixed_ends: False, init_string_ends: None}
+
