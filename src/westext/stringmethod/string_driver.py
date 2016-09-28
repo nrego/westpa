@@ -273,7 +273,8 @@ class StringDriver(object):
         try:
             dfargs = getattr(self.system, 'dfargs', None)
             dfkwargs = getattr(self.system, 'dfkwargs', None)
-            dfkwargs['inv_tensor'] = self.inv_tensor
+            if dfkwargs:
+                dfkwargs['inv_tensor'] = self.inv_tensor
             log.debug('dfkwargs: {}'.format(dfkwargs))
             
             self.system.bin_mapper = VoronoiBinMapper(self.dfunc, self.strings.centers, 

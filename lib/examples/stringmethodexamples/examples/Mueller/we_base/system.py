@@ -45,8 +45,8 @@ class SimpleLangevinPropagator(WESTPropagator):
         XI = 1.5
         BETA = self.beta
         NDIMS = 2
-        DT = 0.005
-        ISPERIODIC = np.array([0], dtype=np.int)
+        DT = 1e-4
+        ISPERIODIC = np.array([0, 0], dtype=np.int)
         BOXSIZE = np.array([1.0E8, 1.0E8], dtype=pcoord_dtype)
 
         self.integrator = cIntegratorSimple.SimpleIntegrator(ff, MASS, XI, BETA, DT, NDIMS, ISPERIODIC, BOXSIZE, genrandint())
@@ -58,18 +58,19 @@ class SimpleLangevinPropagator(WESTPropagator):
 
         state.pcoord = pcoord
 
-    def propagate(self, segments):
+    def propagate(self,segments):
 
         for segment in segments:
             starttime = time.time()
-            new_pcoords = np.empty((self.nsteps, self.ndim+1), dtype=pcoord_dtype)
-            new_pcoords[0,:] = segment.pcoord[0,:]
-            x = new_pcoords[0,:2].copy()
 
-            for istep in xrange(1, self.nsteps):
-                self.integrator.step(x, self.nsubsteps)
-                new_pcoords[istep,:2] = x
-                new_pcoords[istep,2] = self.get_label(x, new_pcoords[istep-1,2])
+            new_pcoords = np.empty((self.nsteps,self.ndim), dtype=pcoord_dtype)
+            new_pcoords[0,:] = segment.pcoord[0,:]
+
+            x = new_pcoords[0,:].copy()
+            
+            for istep in xrange(1,self.nsteps):
+                self.integrator.step(x,self.nsubsteps)
+                new_pcoords[istep,:] = x
 
             segment.pcoord = new_pcoords[...]
             segment.status = Segment.SEG_STATUS_COMPLETE
@@ -90,26 +91,21 @@ class System(WESTSystem):
         self.target_count = rc.get('target_count')
         self.nbins = rc.get('nbins')
 
-        slen = self.nbins // 2
-        x = np.linspace(-3.0, 3.0, slen)
+        slen = self.nbins
+        x = np.linspace(-1.0, 0.75, slen)
+        y = np.linspace(0, 2.0, slen)
+        y[:] = 1.0
         centers = np.zeros((self.nbins, self.pcoord_ndim), dtype=self.pcoord_dtype)
-        centers[:slen, 0] = x
-        centers[slen:, 0] = x[::-1]
-
-        centers[:slen, 2] = 0.0
-        centers[slen:, 2] = 1.0
+        centers[:, 0] = x
+        centers[:, 1] = y
 
         self.bin_mapper = VoronoiBinMapper(dfunc, centers)
         self.bin_target_counts = np.zeros((self.bin_mapper.nbins,), dtype=np.int_)
         self.bin_target_counts[...] = self.target_count
 
-        slen = self.nbins // 2
-        self.sm_params = {'slen': [slen, slen],
-                          'kappa': 0.001,
-                          'dtau': 0.15,
+        slen = self.nbins 
+        self.sm_params = {'slen': [slen],
+                          'kappa': 0.1,
+                          'dtau': 0.1,
                           'fixed_ends': False,
-                          'sciflag': True,
-                          'mpairs': [[0, self.nbins - 1], [slen - 1, slen]],
-                          'slabels': [2],
-                          'fourierflag': True,
-                          'fourier_P': 2}
+                          'sciflag': True}

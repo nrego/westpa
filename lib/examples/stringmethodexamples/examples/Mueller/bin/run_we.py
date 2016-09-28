@@ -2,6 +2,7 @@ import multiprocessing
 import os, sys
 import yaml
 import argparse
+from IPython import embed
 
 basedir = os.getcwd()
 
@@ -145,4 +146,5 @@ if __name__ == '__main__':
         if not os.path.exists(os.path.join(basedir,grp['name'])):
             os.makedirs(os.path.join(basedir,grp['name']))
             os.makedirs(os.path.join(basedir,grp['name'],'analysis'))
+    #embed()
     pool.map(run_job, inputs,chunksize=1)
