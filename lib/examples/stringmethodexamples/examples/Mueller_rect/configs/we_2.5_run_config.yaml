@@ -1,0 +1,29 @@
+---
+name: we_2.5
+beta: 2.5
+nbins: 100
+target_count: 50
+tau: 10
+propagator_block_size: 5001
+adjust_counts: True
+protocols:
+    - name: phase1
+      max_iterations: 800
+      wess: {do_reweighting: True, window_size: 0.5, reweight_period: 20, max_window_size: 2000}
+      stringmethod: {do_update: True, windowsize: 50, update_interval: 10, initial_update: 10}
+    - name: phase2
+      max_iterations: 4000
+      wess: {do_reweighting: True, window_size: 0.5, reweight_period: 20, max_window_size: 2000}
+      stringmethod: {do_update: False, windowsize: 50, update_interval: 10, initial_update: 10}
+    - name: phase3
+      max_iterations: 10000
+      wess: {do_reweighting: False, window_size: 0.5, reweight_period: 20, max_window_size: 2000}
+      stringmethod: {do_update: False, windowsize: 50, update_interval: 10, initial_update: 10}
+analysis:
+    winsize_flux: 200
+    winsize_err: 5
+    last_n: 1000
+    bf_dt: 20.0
+    bf_blocksize: 500000
+    directions: [0,1]
+
