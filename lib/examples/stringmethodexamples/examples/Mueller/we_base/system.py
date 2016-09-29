@@ -54,7 +54,9 @@ class SimpleLangevinPropagator(WESTPropagator):
     def get_pcoord(self, state):
         pcoord = None
         if state.label == 'initA':
-            pcoord = [-0.5, 0.5]
+            pcoord = [-1.0, 1.0]
+        if state.label == 'initB':
+            pcoord = [0.5, 0.5]
 
         state.pcoord = pcoord
 
@@ -92,9 +94,9 @@ class System(WESTSystem):
         self.nbins = rc.get('nbins')
 
         slen = self.nbins
-        x = np.linspace(-1.0, 0.75, slen)
-        y = np.linspace(0, 2.0, slen)
-        y[:] = 1.0
+        x = np.linspace(-0.5, 0.75, slen)
+        y = np.linspace(1.5, 0.03, slen)
+        #y[:] = 1.0
         centers = np.zeros((self.nbins, self.pcoord_ndim), dtype=self.pcoord_dtype)
         centers[:, 0] = x
         centers[:, 1] = y
@@ -105,7 +107,8 @@ class System(WESTSystem):
 
         slen = self.nbins 
         self.sm_params = {'slen': [slen],
-                          'kappa': 0.1,
+                          'kappa': 0.4,
                           'dtau': 0.1,
                           'fixed_ends': False,
-                          'sciflag': True}
+                          'sciflag': True,
+                          'fourierflag': False}

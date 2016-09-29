@@ -155,6 +155,9 @@ class WEEDDriver:
 
         probAdjustEquil(binprobs, averager.average_rate, averager.stderr_rate)
         
+        #nrego add - what to do about nans??
+        if numpy.isnan(binprobs).any():
+            binprobs[numpy.isnan(binprobs)] = orig_binprobs[numpy.isnan(binprobs)]
         # Check to see if reweighting has set non-zero bins to zero probability (should never happen)
         assert (~((orig_binprobs > 0) & (binprobs == 0))).all(), 'populated bin reweighted to zero probability'
         

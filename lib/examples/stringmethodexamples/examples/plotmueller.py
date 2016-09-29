@@ -4,8 +4,6 @@ from matplotlib import pyplot as plt
 import h5py
 
 
-
-
 def mueller(x, y):
     aa = [-1, -1, -6.5, 0.7]
     bb = [0, 0, 11, 0.6]
@@ -35,11 +33,11 @@ f = h5py.File('strings.h5')
 all_strings = f['strings'][...]
 plotmueller()
 for i in range(all_strings.shape[0]):
-    if i % 10 == 0:
+    if i % 48 == 0:
         string = all_strings[i]
-        #plt.plot(string[:,0], string[:,1], '-o', label='{}'.format(i))
+        plt.plot(string[:,0], string[:,1], '-o', label='{}'.format(i))
 
-#plt.legend()
+plt.legend()
 plt.colorbar()
 plt.show()
     

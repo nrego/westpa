@@ -1,23 +1,23 @@
 ---
 name: we_1.0
 beta: 1.0
-nbins: 50
+nbins: 100
 target_count: 40
 tau: 10
-propagator_block_size: 2000
+propagator_block_size: 4000
 adjust_counts: True
 protocols:
     - name: phase1
       max_iterations: 800
-      wess: {do_reweighting: True, window_size: 0.5, reweight_period: 10, max_window_size: 2000}
-      stringmethod: {do_update: True, windowsize: 50, update_interval: 2, initial_update: 10}
+      weed: {do_reweighting: True, window_size: 0.5, reweight_period: 10, max_window_size: 2000}
+      stringmethod: {do_update: True, windowsize: 50, update_interval: 10, initial_update: 10}
     - name: phase2
       max_iterations: 1500
-      wess: {do_reweighting: True, window_size: 0.5, reweight_period: 25, max_window_size: 2000}
+      weed: {do_reweighting: True, window_size: 0.5, reweight_period: 25, max_window_size: 2000}
       stringmethod: {do_update: False, windowsize: 50, update_interval: 2, initial_update: 10}
     - name: phase3
       max_iterations: 5000
-      wess: {do_reweighting: False, window_size: 0.5, reweight_period: 10, max_window_size: 2000}
+      weed: {do_reweighting: False, window_size: 0.5, reweight_period: 10, max_window_size: 2000}
       stringmethod: {do_update: False, windowsize: 50, update_interval: 2, initial_update: 10}
 analysis:
     winsize_flux: 200

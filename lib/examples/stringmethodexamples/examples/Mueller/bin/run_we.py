@@ -19,7 +19,7 @@ echo west_pythonpath: $WEST_PYTHONPATH
 echo west_sim_root: $WEST_SIM_ROOT
 echo west_root: $WEST_ROOT
 
-BSTATE_ARGS="--bstate initA,1.0"
+BSTATE_ARGS="--bstate initA,0.5 --bstate initB,0.5"
 
 if [ ! -f west.h5 ];
 then
@@ -36,9 +36,9 @@ def build_west_cfg(config_data, protocol):
     wd = {k:config_data[k] for k in  ['beta','nbins','target_count','tau','propagator_block_size','adjust_counts']}
     wd['max_iterations'] = protocol['max_iterations']
 
-    # wess parameters
-    for p in protocol['wess']:
-        wd['wess_' + p] = protocol['wess'][p]
+    # weed parameters
+    for p in protocol['weed']:
+        wd['weed_' + p] = protocol['weed'][p]
 
     # string method parameters
     for p in protocol['stringmethod']:
