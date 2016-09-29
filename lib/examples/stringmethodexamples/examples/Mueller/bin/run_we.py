@@ -27,8 +27,7 @@ then
     wait
 fi
 
-$WEST_ROOT/bin/w_run -r we_{sim_name}.cfg --verbose > sim_{sim_name}.log &
-wait
+$WEST_ROOT/bin/w_run -r we_{sim_name}.cfg --verbose 
 """
 
 

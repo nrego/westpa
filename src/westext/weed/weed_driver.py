@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 import numpy
 import operator
 from itertools import izip, imap
-
+from IPython import embed
 import westpa, west
 from westpa.yamlcfg import check_bool
 from westpa.kinetics import RateAverager
@@ -155,15 +155,22 @@ class WEEDDriver:
 
         probAdjustEquil(binprobs, averager.average_rate, averager.stderr_rate)
         
-        #nrego add - what to do about nans??
-        if numpy.isnan(binprobs).any():
-            binprobs[numpy.isnan(binprobs)] = orig_binprobs[numpy.isnan(binprobs)]
+
         # Check to see if reweighting has set non-zero bins to zero probability (should never happen)
         assert (~((orig_binprobs > 0) & (binprobs == 0))).all(), 'populated bin reweighted to zero probability'
         
-        # Check to see if reweighting has set zero bins to nonzero probability (may happen)
+        nan_mask = numpy.isnan(binprobs)
         z2nz_mask = (orig_binprobs == 0) & (binprobs > 0) 
-        if (z2nz_mask).any():
+        #nrego add - what to do about nans??
+        if nan_mask.any():
+            #embed()
+            #binprobs[numpy.isnan(binprobs)] = orig_binprobs[numpy.isnan(binprobs)]
+            westpa.rc.pstatus('Reweighting assigns an invalid (NaN) probability to at least one bin; not reweighting this iteration')        
+            westpa.rc.pstatus('Bins assigned invalid (NaN) probability: {!s}.'
+                                .format(numpy.array_str(numpy.arange(n_bins)[nan_mask])))        
+        # Check to see if reweighting has set zero bins to nonzero probability (may happen)
+
+        elif (z2nz_mask).any():
             westpa.rc.pstatus('Reweighting would assign nonzero probability to an empty bin; not reweighting this iteration.')
             westpa.rc.pstatus('Empty bins assigned nonzero probability: {!s}.'
                                 .format(numpy.array_str(numpy.arange(n_bins)[z2nz_mask])))
