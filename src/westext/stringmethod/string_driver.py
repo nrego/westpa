@@ -425,7 +425,12 @@ class StringDriver(object):
         westpa.rc.pstatus('westext.stringmethod: Updating string\n')
         westpa.rc.pflush()
 
+        prev_centers = self.strings.centers.copy()
         self.strings.update_string_centers(avg_pos, sum_bin_weight)
+        if self.strings._nstrings == 1:
+            rmsd = np.sqrt(np.sum((self.strings.centers - prev_centers)**2))
+            L = self.strings.calculate_length(self.strings.centers)[-1]
+            westpa.rc.pstatus('westext.stringmethod: RMSD/len w.r.t previous string: {}\n'.format(rmsd/L))
 
         westpa.rc.pstatus('westext.stringmethod: String lengths: {}\n'.format(self.strings.length))
         westpa.rc.pflush()
