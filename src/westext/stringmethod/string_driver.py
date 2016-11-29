@@ -427,10 +427,12 @@ class StringDriver(object):
 
         prev_centers = self.strings.centers.copy()
         self.strings.update_string_centers(avg_pos, sum_bin_weight)
-        if self.strings._nstrings == 1:
-            rmsd = np.sqrt(np.sum((self.strings.centers - prev_centers)**2))
-            L = self.strings.calculate_length(self.strings.centers)[-1]
-            westpa.rc.pstatus('westext.stringmethod: RMSD/len w.r.t previous string: {}\n'.format(rmsd/L))
+        rmsds = []
+        L = self.strings.length
+        for sid, si in enumerate(self.strings._strindx):
+            rmsds.append(np.sqrt(np.sum((self.strings.centers[si] - prev_centers[si])**2) / L[sid]))
+
+        westpa.rc.pstatus('westext.stringmethod: RMSD/len w.r.t previous string: {}\n'.format(rmsds))
 
         westpa.rc.pstatus('westext.stringmethod: String lengths: {}\n'.format(self.strings.length))
         westpa.rc.pflush()
