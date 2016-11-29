@@ -20,9 +20,7 @@ def dfunc(coord_t[:] p, coord_t[:,::1] centers):
 
     for k in xrange(ncenters):
         pp_x = p[0]
-        pp_y = p[1] - centers[k,1]
-        pp_y -= rintf(pp_y)
-        pp_y += centers[k,1]
+        pp_y = p[1]
 
         d[k] = (pp_x - centers[k,0])**2 + (pp_y - centers[k,1])**2
 

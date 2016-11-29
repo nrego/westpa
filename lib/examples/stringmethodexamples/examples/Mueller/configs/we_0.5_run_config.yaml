@@ -1,7 +1,7 @@
 ---
 name: we_0.5
 beta: 0.5
-nbins: 100
+nbins: 50
 target_count: 40
 tau: 10
 propagator_block_size: 4000

@@ -94,12 +94,15 @@ class System(WESTSystem):
         self.nbins = rc.get('nbins')
 
         slen = self.nbins
-        x = np.linspace(-0.5, 0.75, slen)
-        y = np.linspace(1.5, 0.03, slen)
         #y[:] = 1.0
         centers = np.zeros((self.nbins, self.pcoord_ndim), dtype=self.pcoord_dtype)
-        centers[:, 0] = x
-        centers[:, 1] = y
+
+        #endpoint1 = np.array([-0.55918841,  1.44078036])
+        #endpoint2 = np.array([ 0.61810024,  0.03152928])
+        endpoint1 = np.array([-1.5, 1.0])
+        endpoint2 = np.array([1.0, 1.0])
+        centers[:,0] = np.linspace(endpoint1[0], endpoint2[0], self.nbins)
+        centers[:,1] = np.linspace(endpoint1[1], endpoint2[1], self.nbins)
 
         self.bin_mapper = VoronoiBinMapper(dfunc, centers)
         self.bin_target_counts = np.zeros((self.bin_mapper.nbins,), dtype=np.int_)
@@ -107,7 +110,7 @@ class System(WESTSystem):
 
         slen = self.nbins 
         self.sm_params = {'slen': [slen],
-                          'kappa': 0.4,
+                          'kappa': 0.1,
                           'dtau': 0.1,
                           'fixed_ends': False,
                           'sciflag': True,
