@@ -27,6 +27,11 @@ def plotmueller(beta=1):
 
     plt.contourf(xx, yy, v.clip(max=200), 40)
 
+def calculate_length(x):
+    dd = x - np.roll(x, 1, axis=0)
+    dd[0,:] = 0.0
+    return np.cumsum(np.sqrt((dd*dd).sum(axis=1)))
+
 
 f = h5py.File('strings.h5')
 
