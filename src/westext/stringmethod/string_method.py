@@ -89,7 +89,28 @@ class DefaultStringMethod(WESTStringMethod):
 
         self._mpairs = mpairs
 
-        assert np.sum(self._slen) == self._N
+        total_centers = np.sum(self._slen)
+        if self._nstrings > 1:
+            assert total_centers == self._N
+        # Allow user to dynamically resize the number of string centers (only for one string currently)
+        else:
+            if total_centers != self._N:
+                log.warning('Number of string centers has changed from {} to {}'.format(self._N, total_centers))
+                log.warning('Re-interpolating string...')
+                L = self.calculate_length(centers)
+                L /= L[-1]
+                centers_new = np.zeros((total_centers, self._ndim), dtype=centers.dtype)
+                g2 = np.linspace(0,1,total_centers)
+                if self._SCIPY_FLAG:
+                    for k in xrange(self._ndim):
+                        f = scipy.interpolate.interp1d(L,centers[:,k],kind='linear')
+                        centers_new[:,k] = f(g2)
+                else:
+                    for k in xrange(self._ndim):
+                        centers_new[:,k] = np.interp(g2,L,centers[:,k])
+                centers = centers_new
+                self._N = centers.shape[0]
+                self._centers = centers
 
         self._skip_dim = np.array(slabels) if slabels is not None else np.array([])
 
