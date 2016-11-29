@@ -430,7 +430,7 @@ class StringDriver(object):
         rmsds = []
         L = self.strings.length
         for sid, si in enumerate(self.strings._strindx):
-            rmsds.append(np.sqrt(np.sum((self.strings.centers[si] - prev_centers[si])**2) / L[sid]))
+            rmsds.append(np.sqrt(np.sum((self.strings.centers[si] - prev_centers[si])**2) / (L[sid]*self.strings._slen[sid])))
 
         westpa.rc.pstatus('westext.stringmethod: RMSD/len w.r.t previous string: {}\n'.format(rmsds))
 
