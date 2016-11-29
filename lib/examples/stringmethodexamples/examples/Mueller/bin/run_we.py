@@ -36,8 +36,8 @@ def build_west_cfg(config_data, protocol):
     wd['max_iterations'] = protocol['max_iterations']
 
     # weed parameters
-    for p in protocol['weed']:
-        wd['weed_' + p] = protocol['weed'][p]
+    for p in protocol['wess']:
+        wd['wess_' + p] = protocol['wess'][p]
 
     # string method parameters
     for p in protocol['stringmethod']:

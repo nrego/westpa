@@ -1907,10 +1907,6 @@ static PyObject *__pyx_pf_5utils_dfunc(CYTHON_UNUSED PyObject *__pyx_self, __Pyx
   size_t __pyx_t_12;
   Py_ssize_t __pyx_t_13;
   size_t __pyx_t_14;
-  Py_ssize_t __pyx_t_15;
-  size_t __pyx_t_16;
-  Py_ssize_t __pyx_t_17;
-  size_t __pyx_t_18;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -1983,7 +1979,7 @@ static PyObject *__pyx_pf_5utils_dfunc(CYTHON_UNUSED PyObject *__pyx_self, __Pyx
  * 
  *     for k in xrange(ncenters):             # <<<<<<<<<<<<<<
  *         pp_x = p[0]
- *         pp_y = p[1] - centers[k,1]
+ *         pp_y = p[1]
  */
   __pyx_t_6 = __pyx_v_ncenters;
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
@@ -1993,8 +1989,8 @@ static PyObject *__pyx_pf_5utils_dfunc(CYTHON_UNUSED PyObject *__pyx_self, __Pyx
  * 
  *     for k in xrange(ncenters):
  *         pp_x = p[0]             # <<<<<<<<<<<<<<
- *         pp_y = p[1] - centers[k,1]
- *         pp_y -= rintf(pp_y)
+ *         pp_y = p[1]
+ * 
  */
     __pyx_t_8 = 0;
     __pyx_v_pp_x = (*((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_p.data + __pyx_t_8 * __pyx_v_p.strides[0]) )));
@@ -2002,51 +1998,29 @@ static PyObject *__pyx_pf_5utils_dfunc(CYTHON_UNUSED PyObject *__pyx_self, __Pyx
     /* "utils.pyx":23
  *     for k in xrange(ncenters):
  *         pp_x = p[0]
- *         pp_y = p[1] - centers[k,1]             # <<<<<<<<<<<<<<
- *         pp_y -= rintf(pp_y)
- *         pp_y += centers[k,1]
- */
-    __pyx_t_9 = 1;
-    __pyx_t_10 = __pyx_v_k;
-    __pyx_t_11 = 1;
-    __pyx_v_pp_y = ((*((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_p.data + __pyx_t_9 * __pyx_v_p.strides[0]) ))) - (*((__pyx_t_5utils_coord_t *) ( /* dim=1 */ ((char *) (((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_centers.data + __pyx_t_10 * __pyx_v_centers.strides[0]) )) + __pyx_t_11)) ))));
-
-    /* "utils.pyx":24
- *         pp_x = p[0]
- *         pp_y = p[1] - centers[k,1]
- *         pp_y -= rintf(pp_y)             # <<<<<<<<<<<<<<
- *         pp_y += centers[k,1]
- * 
- */
-    __pyx_v_pp_y = (__pyx_v_pp_y - rintf(__pyx_v_pp_y));
-
-    /* "utils.pyx":25
- *         pp_y = p[1] - centers[k,1]
- *         pp_y -= rintf(pp_y)
- *         pp_y += centers[k,1]             # <<<<<<<<<<<<<<
+ *         pp_y = p[1]             # <<<<<<<<<<<<<<
  * 
  *         d[k] = (pp_x - centers[k,0])**2 + (pp_y - centers[k,1])**2
  */
-    __pyx_t_12 = __pyx_v_k;
-    __pyx_t_13 = 1;
-    __pyx_v_pp_y = (__pyx_v_pp_y + (*((__pyx_t_5utils_coord_t *) ( /* dim=1 */ ((char *) (((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_centers.data + __pyx_t_12 * __pyx_v_centers.strides[0]) )) + __pyx_t_13)) ))));
+    __pyx_t_9 = 1;
+    __pyx_v_pp_y = (*((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_p.data + __pyx_t_9 * __pyx_v_p.strides[0]) )));
 
-    /* "utils.pyx":27
- *         pp_y += centers[k,1]
+    /* "utils.pyx":25
+ *         pp_y = p[1]
  * 
  *         d[k] = (pp_x - centers[k,0])**2 + (pp_y - centers[k,1])**2             # <<<<<<<<<<<<<<
  * 
  *     return d
  */
+    __pyx_t_10 = __pyx_v_k;
+    __pyx_t_11 = 0;
+    __pyx_t_12 = __pyx_v_k;
+    __pyx_t_13 = 1;
     __pyx_t_14 = __pyx_v_k;
-    __pyx_t_15 = 0;
-    __pyx_t_16 = __pyx_v_k;
-    __pyx_t_17 = 1;
-    __pyx_t_18 = __pyx_v_k;
-    *__Pyx_BufPtrStrided1d(__pyx_t_5utils_DTYPE_t *, __pyx_pybuffernd_d.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_d.diminfo[0].strides) = (powf((__pyx_v_pp_x - (*((__pyx_t_5utils_coord_t *) ( /* dim=1 */ ((char *) (((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_centers.data + __pyx_t_14 * __pyx_v_centers.strides[0]) )) + __pyx_t_15)) )))), 2.0) + powf((__pyx_v_pp_y - (*((__pyx_t_5utils_coord_t *) ( /* dim=1 */ ((char *) (((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_centers.data + __pyx_t_16 * __pyx_v_centers.strides[0]) )) + __pyx_t_17)) )))), 2.0));
+    *__Pyx_BufPtrStrided1d(__pyx_t_5utils_DTYPE_t *, __pyx_pybuffernd_d.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_d.diminfo[0].strides) = (powf((__pyx_v_pp_x - (*((__pyx_t_5utils_coord_t *) ( /* dim=1 */ ((char *) (((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_centers.data + __pyx_t_10 * __pyx_v_centers.strides[0]) )) + __pyx_t_11)) )))), 2.0) + powf((__pyx_v_pp_y - (*((__pyx_t_5utils_coord_t *) ( /* dim=1 */ ((char *) (((__pyx_t_5utils_coord_t *) ( /* dim=0 */ (__pyx_v_centers.data + __pyx_t_12 * __pyx_v_centers.strides[0]) )) + __pyx_t_13)) )))), 2.0));
   }
 
-  /* "utils.pyx":29
+  /* "utils.pyx":27
  *         d[k] = (pp_x - centers[k,0])**2 + (pp_y - centers[k,1])**2
  * 
  *     return d             # <<<<<<<<<<<<<<

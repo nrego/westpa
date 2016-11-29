@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import h5py
+from IPython import embed
+from fasthist import normhistnd
 
 
 def mueller(x, y):
@@ -20,12 +22,22 @@ def mueller(x, y):
     return V1
 
 
-def plotmueller(beta=1):
+def plotmueller(beta=1, axis=None):
     xx, yy = np.mgrid[-1.5:1.2:0.01, -0.2:2.0:0.01]
 
     v = mueller(xx, yy)
-
-    plt.contourf(xx, yy, v.clip(max=200), 40)
+    v -= v.min()
+    #embed()
+    if axis==0:
+        probs = np.exp(-v)
+        probs = probs.sum(axis=1)
+        plt.plot(xx[:,0], -np.log(probs))
+    elif axis==1:
+        probs = np.exp(-v)
+        probs = probs.sum(axis=0)
+        plt.plot(yy[0,:], -np.log(probs))
+    else:
+        plt.contourf(xx, yy, v.clip(max=200), 40)
 
 def calculate_length(x):
     dd = x - np.roll(x, 1, axis=0)
@@ -35,14 +47,20 @@ def calculate_length(x):
 
 f = h5py.File('strings.h5')
 
-all_strings = f['strings'][...]
-plotmueller()
-for i in range(all_strings.shape[0]):
-    if i % 48 == 0:
-        string = all_strings[i]
-        plt.plot(string[:,0], string[:,1], '-o', label='{}'.format(i))
+try:
+    all_strings = f['strings'][...]
+    
+    for i in range(all_strings.shape[0]):
+        if (i) % (10) == 0:
+            string = all_strings[i]
+            plt.plot(string[:,0], string[:,1], '-o', label='{}'.format(i))
+except:
+    pass
 
+axis=None
+plotmueller(axis=axis)
 plt.legend()
-plt.colorbar()
+if axis is None:
+    plt.colorbar()
 plt.show()
     
