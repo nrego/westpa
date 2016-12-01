@@ -175,6 +175,7 @@ class WESimManager:
         self.rc.pstatus('per-segment maximum non-zero probability:   {:g}'.format(max_seg_prob))
         self.rc.pstatus('per-segment probability dynamic range (kT): {:g}'.format(seg_drange))
         self.rc.pstatus('norm = {:g}, error in norm = {:g} ({:.2g}*epsilon)'.format(norm,(norm-1),(norm-1)/EPS))
+        self.rc.pstatus('occupied bins: {}'.format((bin_counts!=0).astype(int)))
         self.rc.pflush()
         
         if save_summary:
