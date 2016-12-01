@@ -55,11 +55,14 @@ SCRIPT=$(basename $0)
 
 # Show developer-oriented warnings by default, as these may be important to
 # users (e.g. DeprecationWarnings in system or analysis files, etc.)
-if [ -z "$PYTHONWARNINGS" ] ; then
-    export PYTHONWARNINGS="d"
-else
-    export PYTHONWARNINGS="$PYTHONWARNINGS,d"
-fi
+# 
+# Nrego - supress flood of IPython Deprecation Warnings.
+#if [ -z "$PYTHONWARNINGS" ] ; then
+#    export PYTHONWARNINGS="d"
+#else
+#    export PYTHONWARNINGS="$PYTHONWARNINGS,d"
+#fi
+
 
 # Find where the requested script is stashed
 if [ "$SCRIPT" == "west" ] ; then
