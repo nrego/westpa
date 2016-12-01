@@ -1,4 +1,3 @@
-import h5py
 import numpy as np
 import westpa
 import cPickle as pickle
@@ -44,7 +43,7 @@ strings = np.zeros((len(hashes), mapper.centers.shape[0], mapper.centers.shape[1
 
 for i, hashval in enumerate(hashes):
     mapper = dm.get_bin_mapper(hashval)
-
+    plt.plot(mapper.centers[:,0], mapper.centers[:,1], '-o', label='{}'.format(i))
     strings[i] = mapper.centers
 
 pickle.dump(strings, open('strings.pkl', 'w'))

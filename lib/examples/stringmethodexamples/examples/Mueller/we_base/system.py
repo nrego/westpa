@@ -56,7 +56,7 @@ class SimpleLangevinPropagator(WESTPropagator):
         if state.label == 'initA':
             pcoord = [-1.0, 1.0]
         if state.label == 'initB':
-            pcoord = [0.5, 0.5]
+            pcoord = [0.5, 0.0]
 
         state.pcoord = pcoord
 

@@ -414,8 +414,12 @@ class StringDriver(object):
             westpa.rc.pstatus('westext.stringmethod: Updating metric tensor\n')
             westpa.rc.pflush()
             new_tensor = self.avg_metric_tensor(n_iter)
-
-            self.inv_tensor = np.linalg.inv(new_tensor)
+            new_inv_tensor = np.linalg.inv(new_tensor)
+            old_tensor = np.linalg.inv(self.inv_tensor)
+            # output rmsd from old inverse tensor...
+            rmsd = np.sqrt( ((new_tensor - old_tensor)**2).mean() )
+            westpa.rc.pstatus('westext.stringmethod: RMSD of new metric tensor relative to previous: {}'.format(rmsd))
+            self.inv_tensor = new_inv_tensor
 
         westpa.rc.pstatus('westext.stringmethod: Calculating average position in string images\n')
         westpa.rc.pflush()
