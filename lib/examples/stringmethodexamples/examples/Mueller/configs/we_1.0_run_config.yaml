@@ -8,15 +8,15 @@ propagator_block_size: 4000
 adjust_counts: True
 protocols:
     - name: phase1
-      max_iterations: 401
-      wess: {do_reweighting: True, window_size: 0.5, reweight_period: 10, max_window_size: 2000}
-      stringmethod: {do_update: True, windowsize: 50, update_interval: 4, initial_update: 4}
+      max_iterations: 50
+      wess: {do_reweighting: True, window_size: 0.5, reweight_period: 4, max_window_size: 2000}
+      stringmethod: {do_update: True, windowsize: 10, update_interval: 2, initial_update: 10}
     - name: phase2
-      max_iterations: 1500
+      max_iterations: 2000
       wess: {do_reweighting: True, window_size: 0.5, reweight_period: 25, max_window_size: 2000}
       stringmethod: {do_update: False, windowsize: 50, update_interval: 2, initial_update: 10}
     - name: phase3
-      max_iterations: 5000
+      max_iterations: 10000
       wess: {do_reweighting: False, window_size: 0.5, reweight_period: 10, max_window_size: 2000}
       stringmethod: {do_update: False, windowsize: 50, update_interval: 2, initial_update: 10}
 analysis:
