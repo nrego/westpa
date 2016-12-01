@@ -1,8 +1,8 @@
 ---
 name: we_1.0
 beta: 1.0
-nbins: 20
-target_count: 40
+nbins: 2
+target_count: 16
 tau: 10
 propagator_block_size: 4000
 adjust_counts: True

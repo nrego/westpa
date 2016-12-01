@@ -45,7 +45,7 @@ class SimpleLangevinPropagator(WESTPropagator):
         XI = 1.5
         BETA = self.beta
         NDIMS = 2
-        DT = 1e-4
+        DT = 1e-6
         ISPERIODIC = np.array([0, 0], dtype=np.int)
         BOXSIZE = np.array([1.0E8, 1.0E8], dtype=pcoord_dtype)
 
