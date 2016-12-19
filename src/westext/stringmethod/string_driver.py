@@ -443,7 +443,7 @@ class StringDriver(object):
             rms = diffmat.mean(axis=1)
             # Average value of each image
             curr_avgs = curr_center.mean(axis=1)
-            rmsds.append(np.mean(np.sqrt(rms) / curr_avgs)
+            rmsds.append(np.mean(np.sqrt(rms)))
 
         westpa.rc.pstatus('westext.stringmethod: RMSD/len w.r.t previous string: {}\n'.format(rmsds))
 
