@@ -437,7 +437,13 @@ class StringDriver(object):
         for sid, si in enumerate(self.strings._strindx):
             prev_center = prev_centers[si] / L_prev[sid]
             curr_center = self.strings.centers[si] / L[sid]
-            rmsds.append(np.sqrt( np.sum( (curr_center - prev_center)**2 ) / self.strings._slen[sid] ) )
+            #rmsds.append(np.sqrt( np.sum( (curr_center - prev_center)**2 ) / self.strings._slen[sid] ) )
+            diffmat = (curr_center-prev_center)**2
+            # rms for each image w.r.t. prev iteration's corresponding image
+            rms = diffmat.mean(axis=1)
+            # Average value of each image
+            curr_avgs = curr_center.mean(axis=1)
+            rmsds.append(np.mean(np.sqrt(rms) / curr_avgs)
 
         westpa.rc.pstatus('westext.stringmethod: RMSD/len w.r.t previous string: {}\n'.format(rmsds))
 
